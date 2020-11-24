@@ -1,0 +1,56 @@
+version: "3.8"  # python version
+
+services:
+  app:
+    build:
+      context: .
+    restart: always
+    image: registry.docker.dev.westerops.com/dongu-backend-dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=dongu
+      - DB_USER=westerops.com  #alttaki db name
+      - DB_PASS=uLb#h@cs2!@4
+    depends_on:
+      - db    #db starts before app service and app is working if there is any db working
+      # - redis
+    volumes:
+      - media_volume:/app/media
+      - static_volume:/app/static
+
+
+  db:
+    image: postgres:12-alpine
+    restart: always
+    container_name: "dongu_db"
+    ports:
+      - "54320:5432"
+    environment:
+      POSTGRES_DB: dongu
+      POSTGRES_USER: westerops.com
+      POSTGRES_PASSWORD: uLb#h@cs2!@4
+    volumes:
+      - my_dbdata:/var/lib/postgresql/data
+
+  # redis:
+  #   restart: always
+  #   container_name: "redis"
+  #   image: redis:latest
+  #   # expose:
+  #   #   - "6379"
+  #   ports:
+  #     - "6379:6379"
+
+# Added volume
+volumes:
+  my_dbdata:
+  media_volume:
+  static_volume:
